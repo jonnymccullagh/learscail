@@ -1,0 +1,47 @@
+load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+
+# Link all npm packages from pnpm-lock.yaml
+npm_link_all_packages(name = "node_modules")
+
+# Define source files as a js_library for dependency tracking
+js_library(
+    name = "src",
+    srcs = glob([
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "src/**/*.css",
+    ], exclude = ["src/**/*.test.tsx", "src/**/*.test.ts"]),
+    deps = [
+        ":node_modules/@maplibre/maplibre-gl-geocoder",
+        ":node_modules/maplibre-gl",
+        ":node_modules/react",
+        ":node_modules/react-dom",
+        ":node_modules/react-router-dom",
+    ],
+)
+
+# Build with vite - using genrule for simplicity but with Bazel dependency tracking
+genrule(
+    name = "build_react",
+    srcs = [
+        ":src",
+        ":node_modules/vite",
+        ":node_modules/@vitejs/plugin-react",
+        "package.json",
+        "tsconfig.json",
+        "vite.config.ts",
+        "tailwind.config.js",
+        "postcss.config.js",
+        "index.html",
+    ],
+    outs = ["dist.tar.gz"],
+    cmd = """
+        cd react
+        npm run build
+        tar -czf ../$(location dist.tar.gz) -C dist .
+    """,
+    local = 1,
+    tags = ["no-sandbox"],
+    visibility = ["//visibility:public"],
+)

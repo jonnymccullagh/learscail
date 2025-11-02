@@ -1,0 +1,16 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="128" fill="#04cb63"/>
+
+  <!-- Compass needle in center -->
+  <g transform="translate(256, 256)">
+    <!-- North point (red/white outline) -->
+    <path d="M 0,-140 L 50,0 L 0,20 L -50,0 Z" fill="white" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- South point (white outline) -->
+    <path d="M 0,140 L 50,0 L 0,-20 L -50,0 Z" fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Center pivot point -->
+    <circle cx="0" cy="0" r="16" fill="white"/>
+  </g>
+</svg>

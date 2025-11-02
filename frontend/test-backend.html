@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Connection Test - Learscail</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        h2 { color: #666; font-size: 18px; }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        pre {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .test-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Learscail Backend Connection Test</h1>
+
+    <div class="card">
+        <h2>Configuration</h2>
+        <p><strong>Backend URL:</strong> <span id="backendUrl"></span></p>
+        <p><strong>Environment:</strong> <span id="envMode"></span></p>
+    </div>
+
+    <div class="card">
+        <h2>1. Health Check</h2>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <div id="healthResult" class="test-section" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+        <h2>2. Configuration Check</h2>
+        <button onclick="testConfig()">Test Config Endpoint</button>
+        <div id="configResult" class="test-section" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+        <h2>3. Logainm API Test</h2>
+        <button onclick="testLogainm()">Search for "Dublin"</button>
+        <div id="logainmResult" class="test-section" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+        <h2>4. Geograph API Test</h2>
+        <button onclick="testGeograph()">Search near Dublin (53.3498, -6.2603)</button>
+        <div id="geographResult" class="test-section" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+        <h2>5. GraphHopper Routing Test</h2>
+        <button onclick="testGraphHopper()">Get route Dublin → Cork</button>
+        <div id="graphhopperResult" class="test-section" style="display:none;"></div>
+    </div>
+
+    <script>
+        // Get backend URL from environment or use default
+        const BACKEND_URL = 'http://localhost:3001';
+
+        document.getElementById('backendUrl').textContent = BACKEND_URL;
+        document.getElementById('envMode').textContent = 'development';
+
+        function showResult(elementId, status, title, data) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.style.display = 'block';
+
+            const statusClass = status === 'success' ? 'success' : status === 'error' ? 'error' : 'warning';
+
+            resultDiv.innerHTML = `
+                <div>
+                    <span class="status ${statusClass}">${title}</span>
+                </div>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+
+        async function testHealth() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/health`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('healthResult', 'success', '✅ Backend is running', data);
+                } else {
+                    showResult('healthResult', 'error', '❌ Backend error', data);
+                }
+            } catch (error) {
+                showResult('healthResult', 'error', '❌ Connection failed', {
+                    error: error.message,
+                    hint: 'Make sure the backend is running on ' + BACKEND_URL
+                });
+            }
+        }
+
+        async function testConfig() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/debug/config`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('configResult', 'success', '✅ Config loaded', data);
+                } else {
+                    showResult('configResult', 'error', '❌ Config error', data);
+                }
+            } catch (error) {
+                showResult('configResult', 'error', '❌ Connection failed', {
+                    error: error.message
+                });
+            }
+        }
+
+        async function testLogainm() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/logainm/search?query=Dublin`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('logainmResult', 'success', `✅ Found ${data.totalCount || 0} results`, {
+                        totalCount: data.totalCount,
+                        firstResult: data.results?.[0]?.placenames?.[0]?.wording || 'N/A',
+                        sampleData: data.results?.[0] || data
+                    });
+                } else {
+                    showResult('logainmResult', 'error', '❌ Logainm error', data);
+                }
+            } catch (error) {
+                showResult('logainmResult', 'error', '❌ Request failed', {
+                    error: error.message
+                });
+            }
+        }
+
+        async function testGeograph() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/geograph/search?lat=53.3498&lon=-6.2603&radius=5000`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('geographResult', 'success', `✅ Found ${data.items?.length || 0} photos`, {
+                        count: data.items?.length || 0,
+                        firstPhoto: data.items?.[0]?.title || 'N/A',
+                        sampleData: data.items?.[0] || data
+                    });
+                } else {
+                    showResult('geographResult', 'error', '❌ Geograph error', data);
+                }
+            } catch (error) {
+                showResult('geographResult', 'error', '❌ Request failed', {
+                    error: error.message
+                });
+            }
+        }
+
+        async function testGraphHopper() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/graphhopper/route`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        points: [[-6.2603, 53.3498], [-8.4756, 51.8985]], // Dublin -> Cork
+                        profile: 'car',
+                        locale: 'en'
+                    })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    const distance = data.paths?.[0]?.distance;
+                    const time = data.paths?.[0]?.time;
+                    showResult('graphhopperResult', 'success', '✅ Route calculated', {
+                        distance: distance ? `${(distance / 1000).toFixed(1)} km` : 'N/A',
+                        time: time ? `${Math.round(time / 60000)} minutes` : 'N/A',
+                        instructions: data.paths?.[0]?.instructions?.length || 0,
+                        sampleData: data.paths?.[0] || data
+                    });
+                } else {
+                    showResult('graphhopperResult', 'error', '❌ GraphHopper error', data);
+                }
+            } catch (error) {
+                showResult('graphhopperResult', 'error', '❌ Request failed', {
+                    error: error.message
+                });
+            }
+        }
+
+        // Auto-run health check on page load
+        window.addEventListener('load', () => {
+            testHealth();
+        });
+    </script>
+</body>
+</html>

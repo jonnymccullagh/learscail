@@ -1,0 +1,48 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default capability for the main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "http:default",
+    "shell:allow-open",
+    "dialog:default",
+    "dialog:allow-save",
+    "fs:default",
+    "fs:allow-read-text-file",
+    "fs:allow-write-text-file",
+    {
+      "identifier": "http:allow-fetch",
+      "allow": [
+        {
+          "url": "https://www.logainm.ie/api/*"
+        },
+        {
+          "url": "https://en.wiktionary.org/w/api.php*"
+        },
+        {
+          "url": "https://api.geograph.org.uk/*"
+        },
+        {
+          "url": "https://s0.geograph.org.uk/*"
+        },
+        {
+          "url": "https://s1.geograph.org.uk/*"
+        },
+        {
+          "url": "https://s2.geograph.org.uk/*"
+        },
+        {
+          "url": "https://s3.geograph.org.uk/*"
+        },
+        {
+          "url": "https://en.wikipedia.org/api/*"
+        },
+        {
+          "url": "https://ga.wikipedia.org/api/*"
+        }
+      ]
+    }
+  ]
+}

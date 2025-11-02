@@ -1,0 +1,51 @@
+#!/bin/bash
+# Auto-increment version on commit
+# This hook increments the patch version (third number) in VERSION.txt files
+
+increment_version() {
+    local version_file=$1
+
+    if [ ! -f "$version_file" ]; then
+        echo "Warning: $version_file not found, skipping version increment"
+        return
+    fi
+
+    # Read current version
+    current_version=$(cat "$version_file")
+
+    # Parse version (expects format: major.minor.patch)
+    IFS='.' read -ra version_parts <<< "$current_version"
+    major="${version_parts[0]}"
+    minor="${version_parts[1]}"
+    patch="${version_parts[2]}"
+
+    # Increment patch version
+    patch=$((patch + 1))
+
+    # Write new version
+    new_version="$major.$minor.$patch"
+    echo "$new_version" > "$version_file"
+
+    echo "Updated $version_file: $current_version -> $new_version"
+
+    # Stage the updated version file
+    git add "$version_file"
+}
+
+# Only increment if there are actual changes being committed
+if git diff --cached --quiet; then
+    exit 0
+fi
+
+# Increment versions in both frontend and backend
+increment_version "frontend/VERSION.txt"
+increment_version "backend/VERSION.txt"
+
+# Copy frontend VERSION.txt to public folder for web access
+if [ -f "frontend/VERSION.txt" ]; then
+    cp frontend/VERSION.txt frontend/public/VERSION.txt
+    git add frontend/public/VERSION.txt
+    echo "Synced VERSION.txt to frontend/public/"
+fi
+
+exit 0

@@ -1,0 +1,15 @@
+# Taskfile.yml
+
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+  run-dev:
+    cmds:
+    - npx tauri dev
+  build:
+    cmds:
+    - echo "Building packages into src-tauri/target/release/bundle/"
+    - echo "Bazel runs npx tauri build"
+    - bazel build //:build_tauri_mac

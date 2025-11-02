@@ -1,0 +1,27 @@
+###############################################################################
+# Bazel now uses Bzlmod by default to manage external dependencies.
+# Please consider migrating your external dependencies from WORKSPACE to MODULE.bazel.
+#
+# For more details, please check https://github.com/bazelbuild/bazel/issues/18958
+###############################################################################
+
+module(name = "mappa")
+
+# JavaScript/TypeScript rules
+bazel_dep(name = "aspect_rules_js", version = "2.1.0")
+bazel_dep(name = "aspect_rules_ts", version = "3.2.1")
+bazel_dep(name = "aspect_bazel_lib", version = "2.9.4")
+
+# Node.js toolchain
+node = use_extension("@aspect_rules_js//js:extensions.bzl", "node")
+node.toolchain(node_version = "20.11.0")
+
+# npm dependencies
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
+npm.npm_translate_lock(
+    name = "npm",
+    npmrc = "//:.npmrc",
+    pnpm_lock = "//react:pnpm-lock.yaml",
+    verify_node_modules_ignored = "//:.bazelignore",
+)
+use_repo(npm, "npm")

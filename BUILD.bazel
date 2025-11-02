@@ -1,0 +1,12 @@
+  genrule(
+      name = "build_tauri_mac",
+      srcs = [
+          "//react:build_react",  # Depends on React build completing first
+      ],
+      outs = ["mappa.app"],
+      cmd = """
+          npx tauri build --target universal-apple-darwin
+          cp -r src-tauri/target/release/bundle/macos/Mappa.app $(location mappa.app)
+      """,
+      tags = ["manual"],  # Don't build by default as build takes a long time
+  )
