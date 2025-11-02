@@ -46,7 +46,11 @@ export async function queryLogainm(
   try {
     const cleanName = cleanLocationName(locationName);
 
-    const url = new URL(API_ENDPOINTS.logainm.search);
+    // Support both absolute and relative URLs
+    const baseUrl = API_ENDPOINTS.logainm.search.startsWith('http')
+      ? API_ENDPOINTS.logainm.search
+      : window.location.origin + API_ENDPOINTS.logainm.search;
+    const url = new URL(baseUrl);
     url.searchParams.append('query', cleanName);
     url.searchParams.append('limit', '10');
 
@@ -65,7 +69,10 @@ export async function queryLogainm(
 
     // If no exact match but similarNames exist, try first similar name
     if (data.totalCount === 0 && data.similarNames && data.similarNames.length > 0) {
-      const similarUrl = new URL(API_ENDPOINTS.logainm.search);
+      const similarBaseUrl = API_ENDPOINTS.logainm.search.startsWith('http')
+        ? API_ENDPOINTS.logainm.search
+        : window.location.origin + API_ENDPOINTS.logainm.search;
+      const similarUrl = new URL(similarBaseUrl);
       similarUrl.searchParams.append('query', data.similarNames[0]);
       similarUrl.searchParams.append('limit', '10');
 

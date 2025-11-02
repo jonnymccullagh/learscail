@@ -29,7 +29,11 @@ export async function queryGeograph(
   distance: number = 1
 ): Promise<GeographResponse | null> {
   try {
-    const url = new URL(API_ENDPOINTS.geograph.search);
+    // Support both absolute and relative URLs
+    const baseUrl = API_ENDPOINTS.geograph.search.startsWith('http')
+      ? API_ENDPOINTS.geograph.search
+      : window.location.origin + API_ENDPOINTS.geograph.search;
+    const url = new URL(baseUrl);
     url.searchParams.append('lat', lat.toString());
     url.searchParams.append('lon', lng.toString());
     url.searchParams.append('radius', (distance * 1000).toString()); // Convert km to meters
