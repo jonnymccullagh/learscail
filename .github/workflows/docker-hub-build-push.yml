@@ -42,7 +42,7 @@ jobs:
             redbranch/learscail-frontend:${{ steps.version.outputs.version }}
             redbranch/learscail-frontend:latest
           build-args: |
-            VITE_BACKEND_URL=${{ vars.VITE_BACKEND_URL || 'http://localhost:3001' }}
+            VITE_BACKEND_URL=${{ vars.VITE_BACKEND_URL || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64

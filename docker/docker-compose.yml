@@ -3,17 +3,14 @@ version: '3.8'
 services:
   # Backend API service - proxies requests to external APIs
   backend:
-    build:
-      context: ..
-      dockerfile: docker/backend.Dockerfile
-    image: learscail-backend:latest
+    image: redbranch/learscail-backend:latest
     container_name: learscail-backend
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"  # Only accessible from localhost (nginx)
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}  # Set to your domain in production
       - LOGAINM_API_KEY=${LOGAINM_API_KEY}
       - GEOGRAPH_API_KEY=${GEOGRAPH_API_KEY}
       - GRAPHHOPPER_API_KEY=${GRAPHHOPPER_API_KEY}
@@ -25,28 +22,29 @@ services:
       interval: 30s
       timeout: 3s
       retries: 3
+    networks:
+      - learscail
 
   # Production web server - serves built static files
   web:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    image: learscail-frontend:latest
+    image: redbranch/learscail-frontend:latest
     container_name: learscail-web
     ports:
-      - "8080:80"
-    environment:
-      - VITE_BACKEND_URL=http://backend:3001
-    env_file:
-      - .env
+      - "127.0.0.1:8080:80"  # Only accessible from localhost (nginx)
     depends_on:
       - backend
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
       interval: 30s
       timeout: 3s
       retries: 3
+    networks:
+      - learscail
+
+networks:
+  learscail:
+    driver: bridge
 
   # Development service - runs Vite dev server with hot reload
   dev:
