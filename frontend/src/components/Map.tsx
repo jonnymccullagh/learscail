@@ -11,6 +11,7 @@
   import { getHistory } from '../utils/history'
   import { getMapStyleUrl, getMapStyle, saveMapStyle, MAP_STYLES, type MapStyleId } from '../utils/mapStyle'
   import { getFavorites, getShowFavorites, addFavorite, type Favorite } from '../utils/favorites'
+  import { API_ENDPOINTS } from '../config/api'
 
   interface MapProps {
     className?: string
@@ -246,14 +247,21 @@
             }
           }
 
-          // Query Nominatim for regular search
+          // Query Nominatim for regular search via backend proxy
           try {
-            const request =
-              `https://nominatim.openstreetmap.org/search?q=${config.query}` +
-              `&format=geojson&polygon_geojson=1&addressdetails=1` +
-              `&viewbox=-11.0,55.5,-5.0,51.3&bounded=1`;
+            // Construct URL with proper handling for relative URLs
+            const baseUrl = API_ENDPOINTS.nominatim.search.startsWith('http')
+              ? API_ENDPOINTS.nominatim.search
+              : window.location.origin + API_ENDPOINTS.nominatim.search;
+            const url = new URL(baseUrl);
+            url.searchParams.append('q', config.query);
+            url.searchParams.append('format', 'geojson');
+            url.searchParams.append('polygon_geojson', '1');
+            url.searchParams.append('addressdetails', '1');
+            url.searchParams.append('viewbox', '-11.0,55.5,-5.0,51.3');
+            url.searchParams.append('bounded', '1');
 
-            const response = await fetch(request);
+            const response = await fetch(url.toString());
             const geojson = await response.json();
 
             for (const feature of geojson.features) {

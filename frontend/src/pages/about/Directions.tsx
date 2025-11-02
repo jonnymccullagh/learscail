@@ -7,6 +7,7 @@ import { queryRoute, formatDistance, formatDuration, getTurnInstruction, type Ro
 import { getHistory, addToHistory, type HistoryItem } from '../../utils/history'
 import { getDirectionsData, saveDirectionsData } from '../../utils/directionsStorage'
 import { getHomeLocation } from '../../utils/homeLocation'
+import { API_ENDPOINTS } from '../../config/api'
 
 interface SearchResult {
   lat: number
@@ -303,7 +304,11 @@ function Directions() {
     else setSearchingEnd(true)
 
     try {
-      const url = new URL('https://nominatim.openstreetmap.org/search')
+      // Construct URL with proper handling for relative URLs (for backend proxy)
+      const baseUrl = API_ENDPOINTS.nominatim.search.startsWith('http')
+        ? API_ENDPOINTS.nominatim.search
+        : window.location.origin + API_ENDPOINTS.nominatim.search;
+      const url = new URL(baseUrl);
       url.searchParams.append('q', query)
       url.searchParams.append('format', 'json')
       url.searchParams.append('addressdetails', '1')

@@ -22,5 +22,8 @@ export const API_ENDPOINTS = {
     route: `${BACKEND_URL}/api/graphhopper/route`,
     geocode: `${BACKEND_URL}/api/graphhopper/geocode`,
   },
+  nominatim: {
+    search: `${BACKEND_URL}/api/nominatim/search`,
+  },
   health: `${BACKEND_URL}/health`,
 };

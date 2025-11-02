@@ -9,6 +9,7 @@ import { errorHandler } from './middleware/errorHandler';
 import logainmRouter from './routes/logainm';
 import geographRouter from './routes/geograph';
 import graphhopperRouter from './routes/graphhopper';
+import nominatimRouter from './routes/nominatim';
 
 const app: Application = express();
 
@@ -77,6 +78,7 @@ app.get('/debug/config', (req: Request, res: Response) => {
 app.use('/api/logainm', logainmRouter);
 app.use('/api/geograph', geographRouter);
 app.use('/api/graphhopper', graphhopperRouter);
+app.use('/api/nominatim', nominatimRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
@@ -118,6 +120,7 @@ Endpoints:
   - GET  /api/geograph/search
   - POST /api/graphhopper/route
   - GET  /api/graphhopper/geocode
+  - GET  /api/nominatim/search
 
 Debug: curl http://localhost:${config.port}/debug/config
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
