@@ -71,8 +71,8 @@ export async function queryWikipedia(
     const response = await fetchFn(url, {
       method: 'GET',
       headers: {
-        'User-Agent': 'Mappa/1.0',
         'Accept': 'application/json',
+        // Note: User-Agent header removed - not allowed in browser CORS requests
       },
     });
 
