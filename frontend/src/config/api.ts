@@ -2,7 +2,10 @@
 
 // Backend API URL - defaults to localhost for development
 // Can be overridden with VITE_BACKEND_URL environment variable
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+// Empty string means use relative URLs (for nginx reverse proxy)
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL !== undefined
+  ? import.meta.env.VITE_BACKEND_URL
+  : 'http://localhost:3001';
 
 // Check if we're in a Tauri context
 export const isTauri = typeof window !== 'undefined' && '__TAURI__' in window;
