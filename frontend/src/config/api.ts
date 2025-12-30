@@ -25,5 +25,9 @@ export const API_ENDPOINTS = {
   nominatim: {
     search: `${BACKEND_URL}/api/nominatim/search`,
   },
+  sraid: {
+    irish: `${BACKEND_URL}/api/sraid/pronunciation/irish`,
+    english: `${BACKEND_URL}/api/sraid/pronunciation/english`,
+  },
   health: `${BACKEND_URL}/health`,
 };

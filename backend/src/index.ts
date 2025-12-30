@@ -10,6 +10,7 @@ import logainmRouter from './routes/logainm';
 import geographRouter from './routes/geograph';
 import graphhopperRouter from './routes/graphhopper';
 import nominatimRouter from './routes/nominatim';
+import sraidRouter from './routes/sraid';
 
 const app: Application = express();
 
@@ -79,6 +80,7 @@ app.use('/api/logainm', logainmRouter);
 app.use('/api/geograph', geographRouter);
 app.use('/api/graphhopper', graphhopperRouter);
 app.use('/api/nominatim', nominatimRouter);
+app.use('/api/sraid', sraidRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
@@ -121,6 +123,8 @@ Endpoints:
   - POST /api/graphhopper/route
   - GET  /api/graphhopper/geocode
   - GET  /api/nominatim/search
+  - GET  /api/sraid/pronunciation/irish
+  - GET  /api/sraid/pronunciation/english
 
 Debug: curl http://localhost:${config.port}/debug/config
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

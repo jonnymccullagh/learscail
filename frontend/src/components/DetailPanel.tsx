@@ -5,6 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext'
 import { queryLogainm, formatLogainmResult, type LogainmInfo } from '../utils/logainm'
 import { queryGeograph, type GeographResponse } from '../utils/geograph'
 import { queryWikipedia, type WikipediaSummary } from '../utils/wikipedia'
+import { querySraid, type SraidAudioResult } from '../utils/sraid'
 import { addToHistory, getHistory, type HistoryItem } from '../utils/history'
 import { saveDirectionsData, getDirectionsData } from '../utils/directionsStorage'
 
@@ -27,9 +28,11 @@ function DetailPanel({ isOpen, onClose, feature }: DetailPanelProps) {
   const [logainmInfo, setLogainmInfo] = useState<LogainmInfo | null>(null)
   const [geographImages, setGeographImages] = useState<GeographResponse | null>(null)
   const [wikipediaSummary, setWikipediaSummary] = useState<WikipediaSummary | null>(null)
+  const [sraidAudio, setSraidAudio] = useState<SraidAudioResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingGeograph, setIsLoadingGeograph] = useState(false)
   const [isLoadingWikipedia, setIsLoadingWikipedia] = useState(false)
+  const [isLoadingSraid, setIsLoadingSraid] = useState(false)
   const [recentHistory, setRecentHistory] = useState<HistoryItem[]>([])
 
   useEffect(() => {
@@ -54,9 +57,11 @@ function DetailPanel({ isOpen, onClose, feature }: DetailPanelProps) {
       setIsLoading(true)
       setIsLoadingGeograph(true)
       setIsLoadingWikipedia(true)
+      setIsLoadingSraid(true)
       setLogainmInfo(null)
       setGeographImages(null)
       setWikipediaSummary(null)
+      setSraidAudio(null)
 
       const locationName = feature.nameGa || feature.nameEn || feature.name
 
@@ -114,6 +119,24 @@ function DetailPanel({ isOpen, onClose, feature }: DetailPanelProps) {
       } else {
         console.log('No page name for Wikipedia');
         setIsLoadingWikipedia(false)
+      }
+
+      // Query Sraid for pronunciation audio (always use English name)
+      const englishName = feature.nameEn || feature.name
+      if (englishName) {
+        querySraid(englishName)
+          .then(result => {
+            console.log('Sraid result:', result);
+            if (result && (result.irish?.count || result.english?.count)) {
+              setSraidAudio(result)
+            }
+            setIsLoadingSraid(false)
+          }).catch((err) => {
+            console.error('Sraid query error:', err);
+            setIsLoadingSraid(false)
+          })
+      } else {
+        setIsLoadingSraid(false)
       }
     }
   }, [isOpen, feature, language])
@@ -267,6 +290,70 @@ function DetailPanel({ isOpen, onClose, feature }: DetailPanelProps) {
                               <span className="text-gray-600"> - {item.translation}</span>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Sraid Pronunciation Audio */}
+          {(isLoadingSraid || (sraidAudio && (sraidAudio.irish?.count || sraidAudio.english?.count))) && (
+            <>
+              <div className="border-t border-gray-200 my-6"></div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Sraid.redbranch.net</h3>
+
+                {isLoadingSraid && (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                )}
+
+                {!isLoadingSraid && sraidAudio && (
+                  <div className="space-y-4">
+                    {(sraidAudio.irish?.count || sraidAudio.english?.count) && (
+                      <div>
+                        <span className="text-xs text-gray-500 block mb-2">{t('pronunciation')}:</span>
+                        <div className="space-y-2">
+                          {sraidAudio.irish && sraidAudio.irish.count > 0 && sraidAudio.irish.locations[0] && (
+                            <button
+                              onClick={() => {
+                                const audioPath = sraidAudio.irish!.locations[0].path
+                                const audio = new Audio(audioPath)
+                                audio.play().catch(err => {
+                                  console.error('Error playing Sraid audio:', err)
+                                  alert('Unable to play audio.')
+                                })
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 rounded-md text-green-700 text-sm"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                              </svg>
+                              {t('pronunciationIrish')}
+                            </button>
+                          )}
+                          {sraidAudio.english && sraidAudio.english.count > 0 && sraidAudio.english.locations[0] && (
+                            <button
+                              onClick={() => {
+                                const audioPath = sraidAudio.english!.locations[0].path
+                                const audio = new Audio(audioPath)
+                                audio.play().catch(err => {
+                                  console.error('Error playing Sraid audio:', err)
+                                  alert('Unable to play audio.')
+                                })
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 rounded-md text-green-700 text-sm"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                              </svg>
+                              {t('pronunciationEnglish')}
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}
