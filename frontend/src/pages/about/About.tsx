@@ -32,6 +32,7 @@ function About() {
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-3 text-blue-600">{t('acknowledgements')}</h2>
         <ul className="list-disc list-inside space-y-2 text-gray-700">
+          <li>{t('acknowledgementsComer')}</li>
           <li>{t('acknowledgementsOSM')}</li>
           <li>{t('acknowledgementsLogainm')}</li>
           <li>{t('acknowledgementsGraphhopper')}</li>
@@ -65,6 +66,12 @@ function About() {
           <p className="leading-relaxed">{t('contributionsAudio')}</p>
           <div>
             <p className="mb-2">{t('contributionsContact')}</p>
+            <button
+              onClick={() => openLink('https://github.com/jonnymccullagh/learscail/discussions')}
+              className="text-blue-600 hover:text-blue-800 underline font-medium"
+            >
+              https://github.com/jonnymccullagh/learscail/discussions
+            </button>
             <button
               onClick={() => openLink('https://www.linkedin.com/in/jonnymccullagh/')}
               className="text-blue-600 hover:text-blue-800 underline font-medium"
